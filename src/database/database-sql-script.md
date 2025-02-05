@@ -23,7 +23,7 @@ CREATE TABLE "services" (
   service_code VARCHAR(100) UNIQUE PRIMARY KEY NOT NULL,
   service_name VARCHAR(255) NOT NULL,
   service_icon VARCHAR(255),
-  service_tarif BIGINT NOT NULL
+  service_tariff BIGINT NOT NULL
 );
 
 CREATE TABLE "transactions" (
@@ -44,4 +44,36 @@ CREATE TABLE "references" (
   description text
 );
 
+```
+
+## Seeder
+
+Table banners
+
+```sql
+
+INSERT INTO banners (banner_name, banner_image, description) VALUES ('Banner 1', 'https://nutech-integrasi.app/dummy.jpg', 'Lerem Ipsum Dolor sit amet');
+INSERT INTO banners (banner_name, banner_image, description) VALUES ('Banner 2', 'https://nutech-integrasi.app/dummy.jpg', 'Lerem Ipsum Dolor sit amet');
+INSERT INTO banners (banner_name, banner_image, description) VALUES ('Banner 3', 'https://nutech-integrasi.app/dummy.jpg', 'Lerem Ipsum Dolor sit amet');
+INSERT INTO banners (banner_name, banner_image, description) VALUES ('Banner 4', 'https://nutech-integrasi.app/dummy.jpg', 'Lerem Ipsum Dolor sit amet');
+INSERT INTO banners (banner_name, banner_image, description) VALUES ('Banner 5', 'https://nutech-integrasi.app/dummy.jpg', 'Lerem Ipsum Dolor sit amet');
+INSERT INTO banners (banner_name, banner_image, description) VALUES ('Banner 6', 'https://nutech-integrasi.app/dummy.jpg', 'Lerem Ipsum Dolor sit amet');
+
+```
+
+Table services
+
+```sql
+INSERT INTO services (service_code, service_name, service_icon, service_tariff) VALUES ('PAJAK', 'Pajak PBB', 'https://nutech-integrasi.app/dummy.jpg', 40000);
+INSERT INTO services (service_code, service_name, service_icon, service_tariff) VALUES ('PLN', 'Listrik', 'https://nutech-integrasi.app/dummy.jpg', 10000);
+INSERT INTO services (service_code, service_name, service_icon, service_tariff) VALUES ('PDAM', 'PDAM Berlangganan', 'https://nutech-integrasi.app/dummy.jpg', 40000);
+INSERT INTO services (service_code, service_name, service_icon, service_tariff) VALUES ('PULSA', 'Pulsa', 'https://nutech-integrasi.app/dummy.jpg', 40000);
+INSERT INTO services (service_code, service_name, service_icon, service_tariff) VALUES ('PGN', 'PGN Berlanggana', 'https://nutech-integrasi.app/dummy.jpg', 50000);
+INSERT INTO services (service_code, service_name, service_icon, service_tariff) VALUES ('MUSIK', 'Musik Berlangganan', 'https://nutech-integrasi.app/dummy.jpg', 50000);
+INSERT INTO services (service_code, service_name, service_icon, service_tariff) VALUES ('TV', 'TV Berlangganan', 'https://nutech-integrasi.app/dummy.jpg', 50000);
+INSERT INTO services (service_code, service_name, service_icon, service_tariff) VALUES ('PAKET_DATA', 'Paket data', 'https://nutech-integrasi.app/dummy.jpg', 50000);
+INSERT INTO services (service_code, service_name, service_icon, service_tariff) VALUES ('VOUCHER_GAME', 'Voucher Game', 'https://nutech-integrasi.app/dummy.jpg', 100000);
+INSERT INTO services (service_code, service_name, service_icon, service_tariff) VALUES ('VOUCHER_MAKANAN', 'Voucher Makanan', 'https://nutech-integrasi.app/dummy.jpg', 100000);
+INSERT INTO services (service_code, service_name, service_icon, service_tariff) VALUES ('QURBAN', 'Qurban', 'https://nutech-integrasi.app/dummy.jpg', 200000);
+INSERT INTO services (service_code, service_name, service_icon, service_tariff) VALUES ('ZAKAT', 'Zakat', 'https://nutech-integrasi.app/dummy.jpg', 300000);
 ```
