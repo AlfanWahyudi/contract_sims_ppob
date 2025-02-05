@@ -6,7 +6,7 @@
 CREATE TABLE "users" (
   email VARCHAR(255) PRIMARY KEY UNIQUE NOT NULL,
   first_name VARCHAR(255) NOT NULL,
-  last_name VARCHAR(255) NOT NULL,
+  last_name VARCHAR(255),
   password VARCHAR(255) NOT NULL,
   img_file_name TEXT,
   balance BIGINT DEFAULT 0 NOT NULL
@@ -34,7 +34,7 @@ CREATE TABLE "transactions" (
   is_top_up boolean not null,
   service_code varchar(100),
   created_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-  FOREIGN KEY (user_email) REFERENCES "User"(email) ON DELETE CASCADE
+  FOREIGN KEY (user_email) REFERENCES "users"(email) ON DELETE CASCADE
 );
 
 CREATE TABLE "references" (
