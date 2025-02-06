@@ -3,7 +3,10 @@ const cors = require('cors')
 const morgan = require('morgan')
 const bodyParser = require('body-parser')
 
-const userRoutes = require('./routes/user')
+const authRoutes = require('./routes/auth')
+const profileRoutes = require('./routes/profile')
+const bannerRoutes = require('./routes/banner')
+const serviceRoutes = require('./routes/service')
 
 const app = express()
 
@@ -12,7 +15,10 @@ app.use(cors())
 app.use(bodyParser.urlencoded({extended: false}))
 app.use(bodyParser.json())
 
-app.use('/api/users', userRoutes);
+app.use('', authRoutes);
+app.use('/profile', profileRoutes);
+app.use('/banner', bannerRoutes);
+app.use('/services', serviceRoutes);
 
 app.use((req, res, next) => {
   const error = new Error('Not found');

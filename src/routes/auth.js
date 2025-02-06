@@ -6,7 +6,6 @@ const Joi = require('joi')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 
-
 //TODO: cleaning routes code
 router.post('/registration', async (req, res, next) => {
   const email = req.body.email
@@ -171,7 +170,7 @@ router.post('/login',  async (req, res, next) => {
             },
             process.env.JWT_KEY,
             {
-              expiresIn: "30000ms" //TODO:change to 12h 
+              expiresIn: "180000ms" //TODO:change to 12h now its (3 minute)
             }
           )
           return res.status(200).json({
