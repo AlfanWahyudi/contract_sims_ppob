@@ -27,7 +27,7 @@ CREATE TABLE "services" (
 );
 
 CREATE TABLE "transactions" (
-  invoice_number varchar(255) PRIMARY key not null,
+  invoice_number varchar(255) PRIMARY key unique not null,
   user_email varchar(255) not null,
   total_amount BIGINT not null,
   description text not null,
