@@ -4,11 +4,11 @@ const cors = require('cors')
 const morgan = require('morgan')
 const bodyParser = require('body-parser')
 
-const authRoutes = require('./routes/auth')
-const profileRoutes = require('./routes/profile')
-const bannerRoutes = require('./routes/banner')
-const serviceRoutes = require('./routes/service')
-const accessFileRoutes = require('./routes/access-file')
+const authRoutes = require('./routes/authRoute')
+const profileRoutes = require('./routes/profileRoute')
+const bannerRoutes = require('./routes/bannerRoute')
+const serviceRoutes = require('./routes/serviceRoute')
+const accessFileRoutes = require('./routes/accessFileRoute')
 
 const app = express()
 
