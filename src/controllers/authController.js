@@ -62,7 +62,7 @@ exports.login = async (req, res) => {
             },
             process.env.JWT_KEY,
             {
-              expiresIn: "1h" //TODO:change to 12h now its (3 minute)
+              expiresIn: "12h"
             }
           )
           return res.status(200).json({
