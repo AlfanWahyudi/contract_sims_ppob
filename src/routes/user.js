@@ -4,11 +4,11 @@ const { sequelize } = require('../database/database-config')
 const { QueryTypes } = require('sequelize')
 const Joi = require('joi')
 const bcrypt = require('bcrypt')
-
+const jwt = require('jsonwebtoken')
 
 
 //TODO: cleaning routes code
-router.post('/signup', async (req, res, next) => {
+router.post('/registration', async (req, res, next) => {
   const email = req.body.email
   const firstName = req.body.first_name
   const lastName = req.body.last_name
@@ -32,7 +32,7 @@ router.post('/signup', async (req, res, next) => {
   }
 
   //validate with joi
-  const schema = Joi.object({
+  const userSchema = Joi.object({
     email: Joi.string()
       .trim()
       .email()
@@ -41,7 +41,7 @@ router.post('/signup', async (req, res, next) => {
       .messages({
         'string.base': `email seharusnya bertipe 'text'`,
         'string.empty': `email tidak boleh kosong`,
-        'string.max': `Panjang email tidak boleh melebihi {#limit}`,
+        'string.max': `Panjang email tidak boleh melebihi {#limit} karakter`,
         'any.required': `email is required field`
       }),
       
@@ -53,7 +53,7 @@ router.post('/signup', async (req, res, next) => {
       .messages({
         'string.base': `first_name seharusnya bertipe 'text'`,
         'string.empty': `first_name tidak boleh kosong`,
-        'string.max': `Panjang first_name tidak boleh melebihi {#limit}`,
+        'string.max': `Panjang first_name tidak boleh melebihi {#limit} karakter`,
         'any.required': `first_name is required field`
       }),
 
@@ -62,25 +62,25 @@ router.post('/signup', async (req, res, next) => {
       .max(255)
       .messages({
         'string.base': `last_name seharusnya bertipe 'text'`,
-        'string.max': `Panjang last_name tidak boleh melebihi {#limit}`,
+        'string.max': `Panjang last_name tidak boleh melebihi {#limit} karakter`,
         'any.required': `last_name is required field`
       }),
 
     password: Joi.string()
       .trim()
       .min(8)
-      .max(255)
+      .max(16)
       .required()
       .messages({
         'string.base': `password seharusnya bertipe 'text'`,
         'string.empty': `password tidak boleh kosong`,
-        'string.max': `Panjang password tidak boleh melebihi {#limit}`,
-        'string.min': `Panjang password tidak boleh kurang dari {#limit}`,
+        'string.max': `Panjang password tidak boleh melebihi {#limit} karakter`,
+        'string.min': `Panjang password tidak boleh kurang dari {#limit} karakter`,
         'any.required': `password is required field`
       }),
   })
 
-  const { error } = await schema.validateAsync(req.body)
+  const { error } = userSchema.validate(req.body)
   if (error) return res.status(400).json({ 
     status: 102,
     message: error.details[0].message,
@@ -120,8 +120,89 @@ router.post('/signup', async (req, res, next) => {
   })
 })
 
-router.post('/signin', (req, res, next) => {
+router.post('/login',  async (req, res, next) => {
+  const userSchema = Joi.object({
+    email: Joi.string()
+      .trim()
+      .email()
+      .max(255)
+      .required()
+      .messages({
+        'string.base': `email seharusnya bertipe 'text'`,
+        'string.empty': `email tidak boleh kosong`,
+        'string.max': `Panjang email tidak boleh melebihi {#limit} karakter`,
+        'any.required': `email is required field`
+      }),
 
+    password: Joi.string()
+      .trim()
+      .max(16)
+      .required()
+      .messages({
+        'string.base': `password seharusnya bertipe 'text'`,
+        'string.empty': `password tidak boleh kosong`,
+        'string.max': `Panjang password tidak boleh melebihi {#limit} karakter`,
+        'any.required': `password is required field`
+      }),
+  })
+
+  const { error } = userSchema.validate(req.body)
+  if (error) return res.status(400).json({ 
+    status: 102,
+    message: error.details[0].message,
+    data: null 
+  }); 
+
+  const user = await sequelize.query(
+    "SELECT * from users WHERE email = $1",
+    {
+      bind: [req.body.email],
+      type: QueryTypes.SELECT
+    }
+  )
+
+  if (user.length > 0) {
+    bcrypt.compare(req.body.password, user[0].password)
+      .then(result => {
+        if (result) {
+          const token = jwt.sign(
+            {
+              email: user[0].email,
+            },
+            process.env.JWT_KEY,
+            {
+              expiresIn: "30000ms" //TODO:change to 12h 
+            }
+          )
+          return res.status(200).json({
+            status: 0,
+            message: "Login Sukses",
+            data: {
+              token: token
+            }
+          })
+        } else {
+          return res.status(401).json({
+            status: 103,
+            message: "Username atau password salah",
+            data: null
+          })
+        }
+      })
+      .catch(err => {
+        return res.status(401).json({
+          status: 103,
+          message: "Username atau password salah",
+          data: null
+        })
+      })
+  } else {
+    return res.status(401).json({
+      status: 103,
+      message: "Username atau password salah",
+      data: null
+    })
+  }
 })
 
 module.exports = router
