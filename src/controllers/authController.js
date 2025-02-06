@@ -1,6 +1,5 @@
 const { sequelize } = require('../database/database-config')
 const { QueryTypes } = require('sequelize')
-const Joi = require('joi')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 

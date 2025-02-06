@@ -1,10 +1,6 @@
-const express = require('express')
-const router = express.Router()
 const { sequelize } = require('../database/database-config')
 const { QueryTypes } = require('sequelize')
 const Joi = require('joi')
-const authMiddleware = require('../middlewares/auth-middleware')
-const multer = require('multer')
 const fs = require('fs')
 const path = require('path')
 
