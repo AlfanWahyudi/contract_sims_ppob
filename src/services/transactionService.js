@@ -43,9 +43,42 @@ const generateNewInvoice = async () => {
   return invoice
 }
 
+const getAllTransactions = async ({email, limit = 0, offset = 0}) => {
+  const transactionItems = await sequelize.query(
+    `
+      SELECT
+        invoice_number,
+        (
+          CASE
+            WHEN is_top_up = true THEN 'TOPUP'
+            WHEN is_top_up = false THEN 'PAYMENT'
+          END
+        ) AS transaction_type,
+        description,
+        total_amount,
+        TO_CHAR(created_on, 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"')  as created_on
+      FROM
+        transactions
+      WHERE
+        user_email = $email
+      LIMIT $limit OFFSET $offset
+    `,
+    {
+      bind: {
+        email: email,
+        limit: limit,
+        offset: offset
+      },
+      type: QueryTypes.SELECT
+    }
+  )
 
-const getTransaction = (invoice_number) => {
-
+  return transactionItems.map((item) => {
+    return {  
+      ...item,
+      total_amount: parseInt(item.total_amount)
+    }
+  })
 }
 
 const topup = async ({amount, email}) => {
@@ -85,5 +118,5 @@ const payment = async ({amount, email, serviceCode}) => {
 module.exports = {
   topup,
   payment,
-  getTransaction
+  getAllTransactions,
 }
