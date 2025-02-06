@@ -33,7 +33,7 @@ CREATE TABLE "transactions" (
   description text not null,
   is_top_up boolean not null,
   service_code varchar(100),
-  created_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  created_on TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
   FOREIGN KEY (user_email) REFERENCES "users"(email) ON DELETE CASCADE
 );
 
