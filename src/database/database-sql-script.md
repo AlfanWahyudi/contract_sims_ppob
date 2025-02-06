@@ -37,13 +37,6 @@ CREATE TABLE "transactions" (
   FOREIGN KEY (user_email) REFERENCES "users"(email) ON DELETE CASCADE
 );
 
-CREATE TABLE "references" (
-  code varchar(255) PRIMARY key not null,
-  name varchar(255) not null,
-  value text not null,
-  description text
-);
-
 ```
 
 ## Seeder
