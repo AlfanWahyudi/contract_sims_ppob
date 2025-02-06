@@ -2,7 +2,7 @@ require('dotenv').config()
 
 const http = require('http')
 const app = require('./app')
-const initFolder = require('./init-folder')
+const initFolder = require('./initFolder')
 
 const { sequelize } = require('./database/database-config')
 
