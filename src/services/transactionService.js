@@ -110,10 +110,72 @@ const topup = async ({amount, email}) => {
   }
 }
 
-const payment = async ({amount, email, serviceCode}) => {
+const payment = async ({email, service}) => {
+  const newInvoice = await generateNewInvoice()
 
+  await sequelize.query(
+    `
+      INSERT INTO transactions 
+        (invoice_number, user_email, total_amount, description, is_top_up, service_code, created_on)
+      VALUES
+      ($invoice_number, $user_email, $total_amount, $description, $is_top_up, $service_code, $created_on)
+    `,
+    {
+      bind: {
+        invoice_number: newInvoice,
+        user_email: email, 
+        total_amount: parseInt(service.service_tariff), 
+        description: service.service_name, 
+        is_top_up: false,
+        service_code: service.service_code, 
+        created_on: getTimestampStr(),
+      },
+      type: QueryTypes.INSERT
+    }
+  )
+
+  const user = await sequelize.query(
+    `SELECT * from users WHERE email=$email`,
+    {
+      bind: {
+        email: email,
+      },
+      type: QueryTypes.SELECT
+    }
+  )
+
+  const balance = parseInt(user[0].balance)
+  const tariff = parseInt(service.service_tariff)
+  const newBalance = balance - tariff
+
+  const [results, metadata] = await sequelize.query(
+    `
+      UPDATE users
+        SET balance = :balance
+      WHERE email = :email;
+    `,
+    {
+      replacements: {
+        balance: newBalance,
+        email: email
+      },
+      type: QueryTypes.UPDATE
+    }
+  )
+
+  if (metadata > 0) {
+    return {
+      invoice_number: newInvoice,
+      service_code: service.service_code,
+      service_name: service.service_name,
+      transaction_type: "PAYMENT",
+      total_amount: tariff,
+      created_on: getTimestampStr()
+    }
+  }
+
+  return null
 }
-
 
 module.exports = {
   topup,

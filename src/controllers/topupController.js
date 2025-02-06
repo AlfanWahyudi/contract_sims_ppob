@@ -5,6 +5,7 @@ const { topup } = require('../services/transactionService')
 
 
 exports.doTopup = async (req, res) => {
+  // const client = await 
   try {
     const user = await sequelize.query(
       "SELECT balance FROM users WHERE email = :email",
