@@ -87,6 +87,7 @@ router.put('/update', authMiddleware, async (req, res, next) => {
       last_name: Joi.string()
         .trim()
         .max(255)
+        .required()
         .messages({
           'string.base': `last_name seharusnya bertipe 'text'`,
           'string.max': `Panjang last_name tidak boleh melebihi {#limit} karakter`,

@@ -59,6 +59,7 @@ router.post('/registration', async (req, res, next) => {
     last_name: Joi.string()
       .trim()
       .max(255)
+      .required()
       .messages({
         'string.base': `last_name seharusnya bertipe 'text'`,
         'string.max': `Panjang last_name tidak boleh melebihi {#limit} karakter`,
@@ -170,7 +171,7 @@ router.post('/login',  async (req, res, next) => {
             },
             process.env.JWT_KEY,
             {
-              expiresIn: "180000ms" //TODO:change to 12h now its (3 minute)
+              expiresIn: "1h" //TODO:change to 12h now its (3 minute)
             }
           )
           return res.status(200).json({
