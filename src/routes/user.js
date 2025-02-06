@@ -190,9 +190,9 @@ router.post('/login',  async (req, res, next) => {
         }
       })
       .catch(err => {
-        return res.status(401).json({
-          status: 103,
-          message: "Username atau password salah",
+        return res.status(500).json({
+          status: 500,
+          message: err.message,
           data: null
         })
       })
