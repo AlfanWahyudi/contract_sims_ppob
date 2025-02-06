@@ -8,6 +8,7 @@ const authRoutes = require('./routes/authRoute')
 const profileRoutes = require('./routes/profileRoute')
 const bannerRoutes = require('./routes/bannerRoute')
 const serviceRoutes = require('./routes/serviceRoute')
+const balanceRoutes = require('./routes/balanceRoute')
 const accessFileRoutes = require('./routes/accessFileRoute')
 
 const app = express()
@@ -21,6 +22,7 @@ app.use('', authRoutes);
 app.use('/profile', profileRoutes);
 app.use('/banner', bannerRoutes);
 app.use('/services', serviceRoutes);
+app.use('/balance', balanceRoutes);
 app.use('', accessFileRoutes);
 
 app.use((req, res, next) => {
