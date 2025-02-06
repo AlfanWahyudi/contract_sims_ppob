@@ -2,6 +2,7 @@ require('dotenv').config()
 
 const http = require('http')
 const app = require('./app')
+const initFolder = require('./init-folder')
 
 const { sequelize } = require('./database/database-config')
 
@@ -15,6 +16,8 @@ server.listen(port, async () => {
       await sequelize.authenticate();
       console.log('Connection has been established successfully.');
       await sequelize.sync();
+
+      initFolder.run()
   } catch (error) {
       console.error('Unable to connect to the database:', error);
   }
