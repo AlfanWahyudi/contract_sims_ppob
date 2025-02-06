@@ -32,10 +32,18 @@ app.use((req, res, next) => {
 });
 
 app.use((error, req, res, next) => {
+  let status = 100 //later change this
+  let message = error.message
+
+  if (message.includes('filter-image:')) {
+    status = 102
+    message = message.split(':')[1]
+  }
+
   res.status(error.status || 500);
   res.json({
-    status: 100, //later change this
-    message: error.message,
+    status: status,
+    message: message,
     data: null
   });
 });
