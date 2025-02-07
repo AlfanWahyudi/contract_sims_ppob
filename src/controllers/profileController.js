@@ -119,21 +119,12 @@ exports.updateProfile = async (req, res) => {
       }
     }
 
-  
   } catch (error) {
-    let statusCode = 500
-    const resJson = {
+    return res.status(500).json({
       status: 500,
       message: error.message,
       data: null
-    }
-    
-    if (error instanceof Joi.ValidationError) {
-      statusCode = 400
-      resJson.status = 102
-    }
-
-    return res.status(statusCode).json(resJson)
+    })
   }
 }
 
