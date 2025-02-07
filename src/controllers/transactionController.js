@@ -5,34 +5,30 @@ const { getAllTransactions, payment } = require("../services/transactionService"
 
 exports.doPayment = async (req, res) => {
   try {
-    const service = await sequelize.query(
-      `SELECT * from services WHERE service_code = $service_code`,
-      {
-        bind: {
-          service_code: req.body.service_code
-        },
-        type: QueryTypes.SELECT
-      }
-    )
-
-    const result = await payment({
-      email: req.userData.email,
-      service: service[0]
+    const result = await sequelize.transaction(async t => {
+      const service = await sequelize.query(
+        `SELECT * from services WHERE service_code = $service_code`,
+        {
+          bind: {
+            service_code: req.body.service_code
+          },
+          type: QueryTypes.SELECT,
+          transaction: t,
+        }
+      )
+  
+      return await payment({
+        email: req.userData.email,
+        service: service[0],
+        transaction: t,
+      })
     })
 
-    if (result !== null) {
-      return res.status(200).json({
-        status: 0,
-        message: "Transaksi berhasil",
-        data: {result}
-      })
-    } else {
-      return res.status(500).json({
-        status: 500,
-        message: "Transaksi gagal dilakukan",
-        data: null
-      })
-    }
+    return res.status(200).json({
+      status: 0,
+      message: "Transaksi berhasil",
+      data: {...result}
+    })
 
   } catch (error) {
     return res.status(500).json({

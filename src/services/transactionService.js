@@ -79,7 +79,7 @@ const getAllTransactions = async ({email, limit = 0, offset = 0}) => {
   })
 }
 
-const topup = async ({amount, email}) => {
+const topup = async ({amount, email, transaction}) => {
   const newInvoice = await generateNewInvoice()
 
   await sequelize.query(
@@ -99,12 +99,13 @@ const topup = async ({amount, email}) => {
         service_code: null, 
         created_on: getTimestampStr(),
       },
-      type: QueryTypes.INSERT
+      type: QueryTypes.INSERT,
+      transaction: transaction
     }
   )
 }
 
-const payment = async ({email, service}) => {
+const payment = async ({email, service, transaction}) => {
   const newInvoice = await generateNewInvoice()
 
   await sequelize.query(
@@ -124,7 +125,8 @@ const payment = async ({email, service}) => {
         service_code: service.service_code, 
         created_on: getTimestampStr(),
       },
-      type: QueryTypes.INSERT
+      type: QueryTypes.INSERT,
+      transaction: transaction,
     }
   )
 
@@ -134,7 +136,8 @@ const payment = async ({email, service}) => {
       bind: {
         email: email,
       },
-      type: QueryTypes.SELECT
+      type: QueryTypes.SELECT,
+      transaction: transaction,
     }
   )
 
@@ -153,22 +156,19 @@ const payment = async ({email, service}) => {
         balance: newBalance,
         email: email
       },
-      type: QueryTypes.UPDATE
+      type: QueryTypes.UPDATE,
+      transaction: transaction
     }
   )
 
-  if (metadata > 0) {
-    return {
-      invoice_number: newInvoice,
-      service_code: service.service_code,
-      service_name: service.service_name,
-      transaction_type: "PAYMENT",
-      total_amount: tariff,
-      created_on: getTimestampStr()
-    }
+  return {
+    invoice_number: newInvoice,
+    service_code: service.service_code,
+    service_name: service.service_name,
+    transaction_type: "PAYMENT",
+    total_amount: tariff,
+    created_on: getTimestampStr()
   }
-
-  return null
 }
 
 module.exports = {
