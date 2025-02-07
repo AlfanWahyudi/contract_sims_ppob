@@ -1,14 +1,10 @@
 const { sequelize } = require('../database/dbConnection')
 const { QueryTypes } = require('sequelize')
+const { getAllServicesData } = require('../services/serviceDataService')
 
 exports.getAllServices = async (req, res) => {
   try {
-    const serviceItems = await sequelize.query(
-      "SELECT * FROM services ORDER BY service_code asc",
-      {
-        type: QueryTypes.SELECT
-      }
-    )
+    const serviceItems = await getAllServicesData()
   
     if (serviceItems.length > 0) {
       return res.status(200).json({
