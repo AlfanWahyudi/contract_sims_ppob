@@ -1,21 +1,20 @@
 const { sequelize } = require('../database/dbConnection')
 const { QueryTypes } = require('sequelize')
+const { getAllBanners } = require('../services/bannerService')
 
 
 exports.getAllBanners = async (req, res) => {
   try {
-    const bannerItems = await sequelize.query(
-      "SELECT banner_name, banner_image, description FROM banners ORDER BY banner_name asc",
-      {
-        type: QueryTypes.SELECT
-      }
-    )
-  
+    const bannerItems = await getAllBanners()
     if (bannerItems.length > 0) {
       return res.status(200).json({
         status: 0,
         message: "Sukses",
-        data: [...bannerItems.map(banner => ({...banner}))],
+        data: [...bannerItems.map(banner => ({
+          banner_name: banner.banner_name,
+          banner_image: banner.banner_image,
+          description: banner.description
+        }))],
       })
     }
   } catch (error) {
