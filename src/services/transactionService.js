@@ -102,10 +102,6 @@ const topup = async ({amount, email}) => {
       type: QueryTypes.INSERT
     }
   )
-
-  return {
-    balance: amount
-  }
 }
 
 const payment = async ({email, service}) => {

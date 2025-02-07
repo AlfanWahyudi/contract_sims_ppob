@@ -5,7 +5,6 @@ const { topup } = require('../services/transactionService')
 
 
 exports.doTopup = async (req, res) => {
-  // const client = await 
   try {
     const user = await sequelize.query(
       "SELECT balance FROM users WHERE email = :email",
@@ -22,7 +21,7 @@ exports.doTopup = async (req, res) => {
       prevBalance = parseInt(user[0].balance)
     }
 
-    const totalAmount = prevBalance + req.body.top_up_amount
+    const newBalance = prevBalance + req.body.top_up_amount
     const [results, metadata] = await sequelize.query(
       `
         UPDATE users
@@ -31,7 +30,7 @@ exports.doTopup = async (req, res) => {
       `,
       {
         replacements: {
-          balance: totalAmount,
+          balance: newBalance,
           email: req.userData.email
         },
         type: QueryTypes.UPDATE
@@ -39,8 +38,8 @@ exports.doTopup = async (req, res) => {
     )
 
     if (metadata > 0) {
-      const result = await topup({
-        amount: totalAmount,
+      await topup({
+        amount: req.body.top_up_amount,
         email: req.userData.email
       })
 
@@ -48,7 +47,7 @@ exports.doTopup = async (req, res) => {
         status: 0,
         message: "Top Up Balance berhasil",
         data: {
-          ...result,
+          balance: newBalance
         }
       })
     }
