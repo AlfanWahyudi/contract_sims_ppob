@@ -1,9 +1,8 @@
 const { sequelize } = require('../database/dbConnection')
 const { QueryTypes } = require('sequelize')
 const Joi = require('joi')
-const fs = require('fs')
-const path = require('path')
 
+const { removeImageFile } = require('../utils/fileUtil')
 const GeneratorUtil = require('../utils/generator-util')
 
 exports.getProfile = async (req, res) => {
@@ -140,47 +139,40 @@ exports.updateProfile = async (req, res) => {
 
 exports.uploadProfileImg = async (req, res) => {
   try {
-    if (req.file === undefined) {
-      return res.status(400).json({
-        status: 102,
-        message: "File tidak boleh kosong",
-        data: null
-      })
-    } else {
-    
-      const userItems = await sequelize.query(
-        `
-          SELECT 
-            email, 
-            first_name, 
-            (
-              CASE
-                WHEN last_name IS NULL THEN ''
-                ELSE last_name
-              END
-            ) AS last_name,
-            (
-              CASE
-                WHEN img_file_name IS NULL THEN ''
-                WHEN img_file_name = '' THEN ''
-                ELSE concat(:imgPathUrl, img_file_name)
-              END
-            ) AS profile_img
-          FROM 
-            users 
-          WHERE 
-            email = :email
-        `,
-        {
-          replacements: {
-            imgPathUrl: GeneratorUtil.img_path_url(),
-            email: req.userData.email
-          },
-          type: QueryTypes.SELECT
-        }
-      )
-    
-      if (userItems.length > 0) {
+    if (req.file !== undefined) {
+      const result = await sequelize.transaction(async t => {
+        const userItems = await sequelize.query(
+          `
+            SELECT 
+              email, 
+              first_name, 
+              (
+                CASE
+                  WHEN last_name IS NULL THEN ''
+                  ELSE last_name
+                END
+              ) AS last_name,
+              (
+                CASE
+                  WHEN img_file_name IS NULL THEN ''
+                  WHEN img_file_name = '' THEN ''
+                  ELSE concat(:imgPathUrl, img_file_name)
+                END
+              ) AS profile_img
+            FROM 
+              users 
+            WHERE 
+              email = :email
+          `,
+          {
+            replacements: {
+              imgPathUrl: GeneratorUtil.img_path_url(),
+              email: req.userData.email
+            },
+            type: QueryTypes.SELECT
+          }
+        )
+      
         const [results, metadata] = await sequelize.query(
           `
             UPDATE users
@@ -192,32 +184,34 @@ exports.uploadProfileImg = async (req, res) => {
               img_file_name: req.file.filename,
               email: req.userData.email,
             },
-            type: QueryTypes.UPDATE
+            type: QueryTypes.UPDATE,
+            transaction: t,
           }
         )
     
-        if (metadata > 0) {
-          if (userItems[0].profile_img !== "") {
-            const profileImgSplitted = userItems[0].profile_img.split('/')
-            const filename = profileImgSplitted[profileImgSplitted.length - 1]
-
-            const filePath = path.join(process.cwd(), process.env.IMG_PATH, filename)
-            
-            fs.unlinkSync(filePath)
-          }
-
-          return res.status(200).json({
-            status: 0,
-            message: "Update Profile Image berhasil",
-            data: {
-              ...userItems[0],
-              profile_img: `${GeneratorUtil.img_path_url()}${req.file.filename}`
-            }    
-          })
+        if (userItems[0].profile_img !== "") {
+          const profileImgSplitted = userItems[0].profile_img.split('/')
+          const filename = profileImgSplitted[profileImgSplitted.length - 1]
+          removeImageFile(filename)
         }
-      }
+
+        return {
+          ...userItems[0],
+          profile_img: `${GeneratorUtil.img_path_url()}${req.file.filename}`
+        }
+      })
+
+      return res.status(200).json({
+        status: 0,
+        message: "Update Profile Image berhasil",
+        data: result 
+      })
     }
   } catch (error) {
+    if (req.file !== undefined) {
+      removeImageFile(req.file.filename)
+    }
+
     return res.status(500).json({
       status: 500,
       message: error.message,

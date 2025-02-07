@@ -34,3 +34,15 @@ exports.validateUpdateProfile = (req, res, next) => {
 
   next()
 }
+
+exports.validateUpdateProfileImg = (req, res, next) => {
+  if (req.file === undefined) {
+    return res.status(400).json({
+      status: 102,
+      message: "File tidak boleh kosong",
+      data: null
+    })
+  }
+  
+  next();
+}
