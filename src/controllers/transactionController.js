@@ -1,4 +1,4 @@
-const { sequelize } = require('../database/database-config')
+const { sequelize } = require('../database/dbConnection')
 const { QueryTypes } = require('sequelize')
 const { getAllTransactions, payment } = require("../services/transactionService")
 

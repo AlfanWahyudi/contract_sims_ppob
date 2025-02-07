@@ -4,7 +4,7 @@ const http = require('http')
 const app = require('./app')
 const initFolder = require('./initFolder')
 
-const { sequelize } = require('./database/database-config')
+const { sequelize } = require('./database/dbConnection')
 
 const port = process.env.PORT || 3000
 
