@@ -19,6 +19,7 @@ exports.validateUpdateProfile = (req, res, next) => {
       .required()
       .messages({
         'string.base': `last_name seharusnya bertipe 'text'`,
+        'string.empty': `last_name tidak boleh kosong`,
         'string.max': `Panjang last_name tidak boleh melebihi {#limit} karakter`,
         'any.required': `last_name is required field`
       }),
