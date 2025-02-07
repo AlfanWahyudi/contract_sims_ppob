@@ -2,7 +2,7 @@ const { sequelize } = require('../database/dbConnection')
 const { QueryTypes } = require('sequelize')
 const { getTimestampStr } = require('../utils/date-util')
 
-const { getUserByEmail } = require('../services/userService')
+const { getUserByEmail, updateBalance } = require('../services/userService')
 
 
 const generateNewInvoice = async () => {
@@ -141,21 +141,11 @@ const payment = async ({email, service, transaction}) => {
   const tariff = parseInt(service.service_tariff)
   const newBalance = balance - tariff
 
-  const [results, metadata] = await sequelize.query(
-    `
-      UPDATE users
-        SET balance = :balance
-      WHERE email = :email;
-    `,
-    {
-      replacements: {
-        balance: newBalance,
-        email: email
-      },
-      type: QueryTypes.UPDATE,
-      transaction: transaction
-    }
-  )
+  const [results, metadata] = await updateBalance({
+    email,
+    newBalance,
+    transaction
+  })
 
   return {
     invoice_number: newInvoice,

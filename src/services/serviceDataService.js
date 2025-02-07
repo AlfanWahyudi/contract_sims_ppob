@@ -10,6 +10,21 @@ const getAllServicesData = async () => {
   )
 }
 
+const getServiceByCode = async (serviceCode) => {
+  const services = await sequelize.query(
+    `SELECT * from services WHERE service_code = $service_code`,
+    {
+      bind: {
+        service_code: serviceCode
+      },
+      type: QueryTypes.SELECT,
+    }
+  )
+
+  return services.length ? services[0] : null
+}
+
 module.exports = {
-  getAllServicesData
+  getAllServicesData,
+  getServiceByCode
 }

@@ -1,25 +1,21 @@
 const { sequelize } = require('../database/dbConnection')
 const { QueryTypes } = require('sequelize')
 const { getAllTransactions, payment } = require("../services/transactionService")
+const { getServiceByCode } = require('../services/serviceDataService')
 
 
 exports.doPayment = async (req, res) => {
   try {
     const result = await sequelize.transaction(async t => {
-      const service = await sequelize.query(
-        `SELECT * from services WHERE service_code = $service_code`,
-        {
-          bind: {
-            service_code: req.body.service_code
-          },
-          type: QueryTypes.SELECT,
-          transaction: t,
-        }
-      )
+      const service = await getServiceByCode(req.body.service_code)
+
+      if (service === null) {
+        throw new Error("Service tidak ditemukan")
+      }
   
       return await payment({
         email: req.userData.email,
-        service: service[0],
+        service: {...service},
         transaction: t,
       })
     })
