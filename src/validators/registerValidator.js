@@ -3,22 +3,6 @@ const { QueryTypes } = require('sequelize')
 const Joi = require('joi')
 
 exports.validateRegister = async (req, res, next) => {
-  const userItems = await sequelize.query(
-    "SELECT * FROM users WHERE email = $1",
-    {
-      bind: [req.body.email],
-      type: QueryTypes.SELECT
-    }
-  )
-
-  if (userItems.length > 0) {
-    return res.status(400).json({ 
-      status: 102,
-      message: "email sudah digunakan",
-      data: null 
-    })
-  }
-
   const userSchema = Joi.object({
     email: Joi.string()
       .trim()
@@ -74,6 +58,22 @@ exports.validateRegister = async (req, res, next) => {
     message: error.details[0].message,
     data: null 
   }); 
+
+  const userItems = await sequelize.query(
+    "SELECT * FROM users WHERE email = $1",
+    {
+      bind: [req.body.email],
+      type: QueryTypes.SELECT
+    }
+  )
+
+  if (userItems.length > 0) {
+    return res.status(400).json({ 
+      status: 102,
+      message: "email sudah digunakan",
+      data: null 
+    })
+  }
 
   next();
 }
