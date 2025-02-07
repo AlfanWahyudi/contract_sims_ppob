@@ -13,6 +13,22 @@ const getUserByEmail = async (email) => {
   return users.length ? users[0] : null;
 }
 
+const createUser = async ({email, firstName, lastName, passwordHash}) => {
+  return await sequelize.query(
+    "INSERT INTO users (email, first_name, last_name, password) VALUES ($email, $first_name, $last_name, $password)",
+    {
+      bind:{
+        email: email,
+        first_name: firstName,
+        last_name: lastName,
+        password: passwordHash
+      },
+      type: QueryTypes.INSERT
+    }
+  )
+}
+
 module.exports = {
   getUserByEmail,
+  createUser,
 }

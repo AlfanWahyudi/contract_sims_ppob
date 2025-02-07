@@ -3,7 +3,7 @@ const { QueryTypes } = require('sequelize')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 
-const { getUserByEmail } = require('../services/userService')
+const { getUserByEmail, createUser } = require('../services/userService')
 
 exports.register = async (req, res) => {
   try {
@@ -15,18 +15,12 @@ exports.register = async (req, res) => {
           data: null
         })
       } else {
-        await sequelize.query(
-          "INSERT INTO users (email, first_name, last_name, password) VALUES ($email, $first_name, $last_name, $password)",
-          {
-            bind:{
-              email: req.body.email,
-              first_name: req.body.first_name,
-              last_name: req.body.last_name,
-              password: hash
-            },
-            type: QueryTypes.INSERT
-          }
-        )
+        const [results, metadata] = await createUser({
+          email: req.body.email,
+          firstName: req.body.first_name,
+          lastName: req.body.last_name,
+          passwordHash: hash
+        })
 
         return res.status(200).json({
           status: 0,
