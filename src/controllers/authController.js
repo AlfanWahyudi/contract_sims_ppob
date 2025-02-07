@@ -15,8 +15,6 @@ exports.register = async (req, res) => {
           data: null
         })
       } else {
-        console.log("here")
-
         await sequelize.query(
           "INSERT INTO users (email, first_name, last_name, password) VALUES ($email, $first_name, $last_name, $password)",
           {
