@@ -2,7 +2,7 @@ const { Sequelize } = require('sequelize')
 
 const sslOptions = {}
 
-if (process.env.DB_SSL) {
+if (process.env.DB_SSL === "true") {
   sslOptions.ssl = {
     require: true
   }
