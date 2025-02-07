@@ -34,8 +34,6 @@ const generateNewInvoice = async () => {
 
     const increment = highest + 1
     invoice += '-' + String(increment).padStart(3, "0")
-    console.log(highest)
-
   } else {
     invoice += '-001'
   }
