@@ -36,8 +36,7 @@ app.use((req, res, next) => {
 });
 
 app.use((error, req, res, next) => {
-  let status = 500
-  let message = error.message
+  let status = error.status
 
   if (message.includes('filter-image:')) {
     status = 102
