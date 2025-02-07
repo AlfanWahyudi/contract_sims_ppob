@@ -4,48 +4,21 @@ const Joi = require('joi')
 
 const { removeImageFile } = require('../utils/fileUtil')
 const GeneratorUtil = require('../utils/generator-util')
+const { getProfileByEmail, updateProfile, updateProfileImage } = require('../services/userService')
 
 exports.getProfile = async (req, res) => {
   try {
-    const userItems = await sequelize.query(
-      `
-        SELECT 
-          email, 
-          first_name, 
-          (
-            CASE
-              WHEN last_name IS NULL THEN ''
-              ELSE last_name
-            END
-          ) AS last_name,
-          (
-            CASE
-              WHEN img_file_name IS NULL THEN ''
-              WHEN img_file_name = '' THEN ''
-              ELSE concat(:imgPathUrl, img_file_name)
-            END
-          ) AS profile_img
-        FROM 
-          users 
-        WHERE 
-          email = :email
-      `,
-      {
-        replacements: {
-          imgPathUrl: GeneratorUtil.img_path_url(),
-          email: req.userData.email
-        },
-        type: QueryTypes.SELECT
-      }
-    )
-  
-    if (userItems.length > 0) {
-      return res.status(200).json({
-        status: 0,
-        message: "Sukses",
-        data: {...userItems[0]}
-      })
+    const profile = await getProfileByEmail(req.userData.email)
+
+    if (profile === null) {
+      throw new Error("Email tidak ditemukan")
     }
+  
+    return res.status(200).json({
+      status: 0,
+      message: "Sukses",
+      data: {...profile}
+    })
   } catch (error) {
     return res.status(500).json({
       status: 500,
@@ -57,66 +30,28 @@ exports.getProfile = async (req, res) => {
 
 exports.updateProfile = async (req, res) => {
   try {
-    const userItems = await sequelize.query(
-      `
-        SELECT 
-          email, 
-          first_name, 
-          (
-            CASE
-              WHEN last_name IS NULL THEN ''
-              ELSE last_name
-            END
-          ) AS last_name,
-          (
-            CASE
-              WHEN img_file_name IS NULL THEN ''
-              WHEN img_file_name = '' THEN ''
-              ELSE concat(:imgPathUrl, img_file_name)
-            END
-          ) AS profile_img
-        FROM 
-          users 
-        WHERE 
-          email = :email
-      `,
-      {
-        replacements: {
-          imgPathUrl: GeneratorUtil.img_path_url(),
-          email: req.userData.email
-        },
-        type: QueryTypes.SELECT
-      }
-    )
+    const profile = await getProfileByEmail(req.userData.email)
 
-    if (userItems.length > 0) {
-      const [results, metadata] = await sequelize.query(
-        `
-          UPDATE users
-          SET first_name = :first_name, last_name= :last_name
-          WHERE email = :email;
-        `,
-        {
-          replacements: {
-            first_name: req.body.first_name,
-            last_name: req.body.last_name,
-            email: req.userData.email
-          },
-          type: QueryTypes.UPDATE
+    if (profile === null) {
+      throw new Error("Email tidak ditemukan")
+    }
+
+    const [results, metadata] = await updateProfile({
+      firstName: req.body.first_name,
+      lastName: req.body.last_name,
+      email: req.userData.email
+    }) 
+
+    if (metadata > 0) {
+      return res.status(200).json({
+        status: 0,
+        message: "Update Profile berhasil",
+        data: {
+          ...profile,
+          first_name: req.body.first_name,
+          last_name: req.body.last_name,
         }
-      )
-
-      if (metadata > 0) {
-        return res.status(200).json({
-          status: 0,
-          message: "Update Profile berhasil",
-          data: {
-            ...userItems[0],
-            first_name: req.body.first_name,
-            last_name: req.body.last_name,
-          }
-        })
-      }
+      })
     }
 
   } catch (error) {
@@ -132,62 +67,26 @@ exports.uploadProfileImg = async (req, res) => {
   try {
     if (req.file !== undefined) {
       const result = await sequelize.transaction(async t => {
-        const userItems = await sequelize.query(
-          `
-            SELECT 
-              email, 
-              first_name, 
-              (
-                CASE
-                  WHEN last_name IS NULL THEN ''
-                  ELSE last_name
-                END
-              ) AS last_name,
-              (
-                CASE
-                  WHEN img_file_name IS NULL THEN ''
-                  WHEN img_file_name = '' THEN ''
-                  ELSE concat(:imgPathUrl, img_file_name)
-                END
-              ) AS profile_img
-            FROM 
-              users 
-            WHERE 
-              email = :email
-          `,
-          {
-            replacements: {
-              imgPathUrl: GeneratorUtil.img_path_url(),
-              email: req.userData.email
-            },
-            type: QueryTypes.SELECT
-          }
-        )
-      
-        const [results, metadata] = await sequelize.query(
-          `
-            UPDATE users
-            SET img_file_name = :img_file_name
-            WHERE email = :email;
-          `,
-          {
-            replacements: {
-              img_file_name: req.file.filename,
-              email: req.userData.email,
-            },
-            type: QueryTypes.UPDATE,
-            transaction: t,
-          }
-        )
-    
-        if (userItems[0].profile_img !== "") {
-          const profileImgSplitted = userItems[0].profile_img.split('/')
+        const profile = await getProfileByEmail(req.userData.email)
+
+        if (profile === null) {
+          throw new Error("Email tidak ditemukan")
+        }
+
+        const [results, metadata] = await updateProfileImage({
+          filename: req.file.filename,
+          email: req.userData.email,
+          transaction: t,
+        })
+        
+        if (profile.profile_img !== "") {
+          const profileImgSplitted = profile.profile_img.split('/')
           const filename = profileImgSplitted[profileImgSplitted.length - 1]
           removeImageFile(filename)
         }
 
         return {
-          ...userItems[0],
+          ...profile,
           profile_img: `${GeneratorUtil.img_path_url()}${req.file.filename}`
         }
       })
