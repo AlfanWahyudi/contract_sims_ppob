@@ -2,6 +2,8 @@ const { sequelize } = require('../database/dbConnection')
 const { QueryTypes } = require('sequelize')
 const { getTimestampStr } = require('../utils/date-util')
 
+const { getUserByEmail } = require('../services/userService')
+
 
 const generateNewInvoice = async () => {
   const date = new Date();
@@ -130,18 +132,12 @@ const payment = async ({email, service, transaction}) => {
     }
   )
 
-  const user = await sequelize.query(
-    `SELECT * from users WHERE email=$email`,
-    {
-      bind: {
-        email: email,
-      },
-      type: QueryTypes.SELECT,
-      transaction: transaction,
-    }
-  )
+  const user = await getUserByEmail(email)
+  if (user === null) {
+    throw new Error("Email tidak ditemukan")
+  }
 
-  const balance = parseInt(user[0].balance)
+  const balance = parseInt(user.balance)
   const tariff = parseInt(service.service_tariff)
   const newBalance = balance - tariff
 

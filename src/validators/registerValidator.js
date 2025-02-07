@@ -2,6 +2,8 @@ const { sequelize } = require('../database/dbConnection')
 const { QueryTypes } = require('sequelize')
 const Joi = require('joi')
 
+const { getUserByEmail } = require('../services/userService')
+
 exports.validateRegister = async (req, res, next) => {
   const userSchema = Joi.object({
     email: Joi.string()
@@ -60,15 +62,8 @@ exports.validateRegister = async (req, res, next) => {
     data: null 
   }); 
 
-  const userItems = await sequelize.query(
-    "SELECT * FROM users WHERE email = $1",
-    {
-      bind: [req.body.email],
-      type: QueryTypes.SELECT
-    }
-  )
-
-  if (userItems.length > 0) {
+  const user = await getUserByEmail(req.body.email)
+  if (user !== null) {
     return res.status(400).json({ 
       status: 102,
       message: "email sudah digunakan",
