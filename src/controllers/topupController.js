@@ -1,42 +1,26 @@
 const { sequelize } = require('../database/dbConnection')
 const { QueryTypes } = require('sequelize')
 const { topup } = require('../services/transactionService')
+const { updateBalance, getUserByEmail } = require('../services/userService')
 
 exports.doTopup = async (req, res) => {
   try {
     const result = await sequelize.transaction(async t => {
-      const user = await sequelize.query(
-        "SELECT balance FROM users WHERE email = :email",
-        {
-          replacements: {
-            email: req.userData.email
-          },
-          type: QueryTypes.SELECT,
-          transaction: t,
-        }
-      )
-
-      let prevBalance = 0
-      if (user.length > 0) {
-        prevBalance = parseInt(user[0].balance)
+      const user = await  getUserByEmail(req.userData.email) 
+      
+      if (user === null) {
+        throw new Error("Email tidak ditemukan")
       }
 
+      let prevBalance = 0
+      prevBalance = parseInt(user.balance)
       const newBalance = prevBalance + req.body.top_up_amount
-      const [results, metadata] = await sequelize.query(
-        `
-          UPDATE users
-          SET balance = :balance
-          WHERE email = :email;
-        `,
-        {
-          replacements: {
-            balance: newBalance,
-            email: req.userData.email
-          },
-          type: QueryTypes.UPDATE,
-          transaction: t,
-        }
-      )
+
+      const [results, metadata] = await updateBalance({
+        newBalance: newBalance,
+        email: req.userData.email,
+        transaction: t,
+      })
 
       await topup({
         amount: req.body.top_up_amount,

@@ -102,10 +102,29 @@ const updateProfileImage = async ({email, filename, transaction}) => {
   )
 }
 
+const updateBalance = async ({email, newBalance, transaction}) => {
+  return await sequelize.query(
+    `
+      UPDATE users
+      SET balance = :balance
+      WHERE email = :email;
+    `,
+    {
+      replacements: {
+        balance: newBalance,
+        email: email
+      },
+      type: QueryTypes.UPDATE,
+      transaction: transaction,
+    }
+  )
+}
+
 module.exports = {
   getUserByEmail,
   createUser,
   getProfileByEmail,
   updateProfile,
-  updateProfileImage
+  updateProfileImage,
+  updateBalance
 }
